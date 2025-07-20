@@ -110,7 +110,7 @@ def criar_interface(gerenciador, salvar_callback):
             atualizar_lista()
             janela.destroy()
 
-        janela = tk.Toplevel(janela_lista)
+        janela = tk.Toplevel(janela_principal)
         acao = "Editar" if output_existente else "Novo"
         janela.title(f"{acao} Dispositivo - Saída {tomada}")
 
@@ -134,14 +134,13 @@ def criar_interface(gerenciador, salvar_callback):
         tk.Button(janela, text="Confirmar", command=confirmar).grid(row=2, column=0, columnspan=2, pady=10)
 
         # AGORA sim, centralize!
-        centralizar_horizontal_abaixo(janela, janela_lista)
+        centralizar_horizontal_abaixo(janela, janela_principal)
 
         # Para debug (opcional)
         # print("Largura principal:", largura_principal)
         # print("Largura nova janela:", largura_janela)
         # print("x principal:", x_principal)
         # print("x centro:", x_centro)
-
 
     def remover_dispositivo():
         selecionado = tree.selection()
@@ -178,15 +177,13 @@ def criar_interface(gerenciador, salvar_callback):
 
         # Use after_idle para garantir que a janela principal está visível e prontos para abrir a nova janela
         if tipo == "Rega":
-            janela_lista.after_idle(lambda: abrir_janela_rega_lista(janela_lista, output, salvar_e_habilitar))
+            janela_principal.after_idle(lambda: abrir_janela_rega_lista(janela_principal, output, salvar_e_habilitar))
         elif tipo == "Led":
-            janela_lista.after_idle(lambda: abrir_janela_led_lista(janela_lista, output, salvar_e_habilitar))
+            janela_principal.after_idle(lambda: abrir_janela_led_lista(janela_principal, output, salvar_e_habilitar))
         elif tipo == "Wavemaker":
-            janela_lista.after_idle(lambda: abrir_janela_wavemaker_lista(janela_lista, output, salvar_e_habilitar))
+            janela_principal.after_idle(lambda: abrir_janela_wavemaker_lista(janela_principal, output, salvar_e_habilitar))
         else:
-            tk.Label(janela_lista, text=f"A personalização para '{tipo}' ainda não foi implementada.").pack(padx=10, pady=20)
-
-
+            tk.Label(janela_principal, text=f"A personalização para '{tipo}' ainda não foi implementada.").pack(padx=10, pady=20)
 
     def editar_dispositivo():
         selecionado = tree.selection()
@@ -223,13 +220,13 @@ def criar_interface(gerenciador, salvar_callback):
             btn_modificar_horarios.config(state="normal")
 
         if tipo == "Rega":
-            abrir_janela_rega_lista(janela_lista, output, salvar_e_habilitar)
+            abrir_janela_rega_lista(janela_principal, output, salvar_e_habilitar)
         elif tipo == "Led":
-            abrir_janela_led_lista(janela_lista, output, salvar_e_habilitar)
+            abrir_janela_led_lista(janela_principal, output, salvar_e_habilitar)
         elif tipo == "Wavemaker":
-            abrir_janela_wavemaker_lista(janela_lista, output, salvar_e_habilitar)
+            abrir_janela_wavemaker_lista(janela_principal, output, salvar_e_habilitar)
         else:
-            tk.Label(janela_lista, text=f"A personalização para '{tipo}' ainda não foi implementada.").pack(padx=10, pady=20)
+            tk.Label(janela_principal, text=f"A personalização para '{tipo}' ainda não foi implementada.").pack(padx=10, pady=20)
 
     # ----------- Automação dos horários dos relés -----------
 
@@ -298,17 +295,18 @@ def criar_interface(gerenciador, salvar_callback):
     def loop_agendador():
         checar_e_aplicar_acoes()
         atualizar_lista()  # Agora, só status, sem piscar!
-        janela_lista.after(1000, loop_agendador)
+        janela_principal.after(1000, loop_agendador)
 
-    janela_lista = tk.Tk()
-    janela_lista.title("Lista de Dispositivos")
+    janela_principal = tk.Tk()
+    janela_principal.withdraw()
+    janela_principal.title("Lista de Dispositivos")
 
     style = ttk.Style()
     style.configure("Treeview", rowheight=25)
 
-    tk.Label(janela_lista, text="Dispositivos cadastrados:", font=("Arial", 12, "bold")).pack(pady=10)
+    tk.Label(janela_principal, text="Dispositivos cadastrados:", font=("Arial", 12, "bold")).pack(pady=10)
 
-    tree = ttk.Treeview(janela_lista, columns=colunas, show="headings", selectmode="browse", height=len(gerenciador.tomadas))
+    tree = ttk.Treeview(janela_principal, columns=colunas, show="headings", selectmode="browse", height=len(gerenciador.tomadas))
     tree.tag_configure("par", background="#f0f0f0")
     tree.tag_configure("impar", background="#ffffff")
 
@@ -319,7 +317,7 @@ def criar_interface(gerenciador, salvar_callback):
     tree.pack(fill="both", expand=True, padx=10)
     tree.bind("<Double-1>", duplo_clique)
 
-    frame_botoes = tk.Frame(janela_lista)
+    frame_botoes = tk.Frame(janela_principal)
     frame_botoes.pack(pady=10)
 
     btn_editar = tk.Button(frame_botoes, text="Editar", command=editar_dispositivo)
@@ -331,18 +329,20 @@ def criar_interface(gerenciador, salvar_callback):
     btn_modificar_horarios = tk.Button(frame_botoes, text="Modificar Horários", command=modificar_horarios)
     btn_modificar_horarios.pack(side="left", padx=5)
 
-    janela_lista.update_idletasks()
-    largura = janela_lista.winfo_width()
-    altura = janela_lista.winfo_height()
-    largura_tela = janela_lista.winfo_screenwidth()
-    altura_tela = janela_lista.winfo_screenheight()
-    x = (largura_tela // 2) - (largura // 2)
-    y = (altura_tela // 2) - (altura // 2) - 100
-    y = max(0, y)
-    janela_lista.geometry(f"+{x}+{y}")
-
-    label_relogio = tk.Label(janela_lista, text="", font=("Arial", 12))
+    label_relogio = tk.Label(janela_principal, text="", font=("Arial", 12))
     label_relogio.pack(pady=5)
+
+    janela_principal.update_idletasks()
+    largura = janela_principal.winfo_width()
+    altura = janela_principal.winfo_height()
+    largura_tela = janela_principal.winfo_screenwidth()
+    altura_tela = janela_principal.winfo_screenheight()
+    x = (largura_tela // 2) - (largura // 2)
+    y = (altura_tela // 2) - (altura // 2) - 300
+    y = max(0, y)
+    janela_principal.geometry(f"+{x}+{y}")
+
+    
 
     def ajustar_estado_inicial_wavemakers(gerenciador):
         agora_dt = datetime.now()
@@ -369,12 +369,14 @@ def criar_interface(gerenciador, salvar_callback):
                     output.off()
                 output.relay_is_active = estado_desejado
 
-
     Relogio.mostrar_em(label_relogio)
 
     botoes_status = {}
 
     inicializar_lista()  # Cria uma vez só!
+    janela_principal.deiconify()  # Mostra a janela principal
     ajustar_estado_inicial_wavemakers(gerenciador)  # Liga os Wavemakers que estiverem no modo "Sempre ligado"
     loop_agendador()     # Atualiza só o status/cores
-    janela_lista.mainloop()
+    
+    
+    janela_principal.mainloop()
