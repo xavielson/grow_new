@@ -1,13 +1,14 @@
 import tkinter as tk
 from tkinter import ttk
-from utils_tk import ajustar_estado_wavemaker_agora
+from utils_tk import ajustar_estado_wavemaker_agora, centralizar_horizontal_abaixo
 
 def abrir_janela_wavemaker_lista(janela_pai, output, salvar_callback=None):
     janela = tk.Toplevel(janela_pai)
     janela.title(f"Wavemaker - {output.nome}")
     janela.resizable(False, False)
     janela.transient(janela_pai)
-    janela.grab_set()
+    #janela.grab_set()
+    janela.after(10, janela.grab_set)
     janela.focus_force()
 
     frame = tk.Frame(janela, padx=40, pady=40)
@@ -31,25 +32,14 @@ def abrir_janela_wavemaker_lista(janela_pai, output, salvar_callback=None):
         combo.current(0)
     combo.pack(pady=10)
 
-    def salvar():
-        print(f"Salvando modo do Wavemaker: {modo_var.get()}")
+    def salvar():        
         output.wavemaker_mode = modo_var.get()
         ajustar_estado_wavemaker_agora(output)
         if salvar_callback:
-            salvar_callback()  # se quiser que a lista seja atualizada, etc.
-        print(f"Modo do Wavemaker salvo: {output.wavemaker_mode}")
+            salvar_callback()  # se quiser que a lista seja atualizada, etc        
         janela.destroy()
 
     tk.Button(frame, text="Salvar", command=salvar, font=("Arial", 12), width=16).pack(pady=(25,0))
 
     # Centraliza a janela em relação à janela pai
-    janela.update_idletasks()
-    w = janela.winfo_width()
-    h = janela.winfo_height()
-    x_pai = janela_pai.winfo_rootx()
-    y_pai = janela_pai.winfo_rooty()
-    w_pai = janela_pai.winfo_width()
-    h_pai = janela_pai.winfo_height()
-    x = x_pai + (w_pai - w) // 2
-    y = y_pai + (h_pai - h) // 2
-    janela.geometry(f"{w}x{h}+{x}+{y}")
+    centralizar_horizontal_abaixo(janela, janela_pai)
