@@ -4,6 +4,8 @@ class Output:
     def __init__(self, nome, device, pin):
         self.nome = nome
         self.device = device
+        if device == "Wavemaker":
+            self.wavemaker_mode = "Desligado"  # Modo padrão para Wavemaker
         self.pin = pin
         self.ativo = False
         self.horarios = []  # lista de dicts: {"liga": "HH:MM:SS", "desliga": "HH:MM:SS"}

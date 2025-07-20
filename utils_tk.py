@@ -1,4 +1,5 @@
 import tkinter as tk
+from datetime import datetime
 
 def centralizar_janela(janela, janela_pai=None):
     janela.update_idletasks()
@@ -26,3 +27,24 @@ def gerar_lista_horas():
 
 def gerar_lista_minutos():
     return [f"{i:02}" for i in range(60)]
+
+def ajustar_estado_wavemaker_agora(output):
+    agora_dt = datetime.now()
+    modo = getattr(output, "wavemaker_mode", "Sempre ligado")
+    estado_desejado = False
+    if modo == "Sempre ligado":
+        estado_desejado = True
+    elif modo == "Liga/desliga a cada 15 minutos":
+        estado_desejado = (agora_dt.minute % 30) < 15
+    elif modo == "Liga/desliga a cada 30 minutos":
+        estado_desejado = (agora_dt.minute % 60) < 30
+    elif modo == "Liga/desliga a cada 1 hora":
+        estado_desejado = (agora_dt.hour % 2) == 0
+    elif modo == "Liga/desliga a cada 6 horas":
+        estado_desejado = (agora_dt.hour % 12) < 6
+
+    if estado_desejado:
+        output.on()
+    else:
+        output.off()
+    output.relay_is_active = estado_desejado
