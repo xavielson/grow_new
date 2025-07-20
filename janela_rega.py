@@ -10,7 +10,7 @@ def abrir_janela_rega_edicao(janela_pai, salvar_callback, dia_evento=None, hora_
     janela = tk.Toplevel(janela_pai)
     janela.title("Horário de Rega")
     janela.resizable(False, False)
-    janela.transient(janela_pai)
+    janela.transient(janela_pai)    
     janela.focus_force()
 
     frame = tk.Frame(janela, padx=8, pady=8)
@@ -179,6 +179,8 @@ def abrir_janela_rega_lista(janela_pai, output, salvar_callback=None):
     btn_edit.grid(row=1, column=1, padx=3, pady=3)
     btn_del = tk.Button(frame, text="Remover", command=botao_remover)
     btn_del.grid(row=1, column=2, padx=3, pady=3)
+
+    lista_horarios.bind("<Double-1>", lambda event: botao_editar())
 
     atualizar_lista()
     # Centralizar janela

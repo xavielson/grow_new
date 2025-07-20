@@ -90,7 +90,7 @@ def abrir_janela_led_edicao(janela_pai, salvar_callback, botao_modificar_horario
     posicionar_direita(janela, janela_pai)
 
 def abrir_janela_led_lista(janela_pai, output, salvar_callback=None):
-    janela = tk.Toplevel(janela_pai)
+    janela = tk.Toplevel(janela_pai)    
     janela.title(f"Horários - {output.nome} (Led)")
     janela.resizable(False, False)
     janela.transient(janela_pai)
@@ -157,5 +157,10 @@ def abrir_janela_led_lista(janela_pai, output, salvar_callback=None):
     btn_del = tk.Button(frame, text="Remover", command=botao_remover)
     btn_del.grid(row=1, column=2, padx=3, pady=3)
 
+    lista_horarios.bind("<Double-1>", lambda event: botao_editar())
+
     atualizar_lista()
+
     centralizar_horizontal_abaixo(janela, janela_pai)
+
+    

@@ -35,7 +35,6 @@ class Output:
     def __str__(self):
         return f"{self.nome} ({self.device}) - Pin {self.pin}"
 
-
 class GerenciadorOutputs:
     def __init__(self):
         self.tomadas = {i: None for i in range(1, 9)}

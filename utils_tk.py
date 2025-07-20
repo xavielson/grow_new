@@ -68,6 +68,7 @@ def centralizar_horizontal_abaixo(janela, janela_pai, deslocamento=10):
     y = max(0, y)
     janela.geometry(f"+{x}+{y}")
 
+
 def centralizar_horizontal_acima(janela, janela_pai, deslocamento=10):
     """
     Centraliza a janela `janela` na horizontal em relação à `janela_pai`,
