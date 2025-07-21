@@ -1,4 +1,33 @@
-from gpiozero import OutputDevice
+"""GPIO control helper module.
+
+Tries to import ``gpiozero.OutputDevice`` for real hardware control. When
+``gpiozero`` isn't available (e.g. running on a non-Raspberry Pi machine) a
+simple fallback implementation is used so the rest of the application can run
+without errors.
+"""
+
+try:
+    from gpiozero import OutputDevice  # type: ignore
+except Exception:
+    class OutputDevice:
+        """Fallback OutputDevice used when gpiozero is missing.
+
+        It mimics the subset of the real class used by the application and
+        simply prints state changes to stdout.
+        """
+
+        def __init__(self, pin, active_high=False, initial_value=False):
+            self.pin = pin
+            self.active_high = active_high
+            self.value = initial_value
+
+        def on(self):
+            self.value = True
+            print(f"[SIM] GPIO {self.pin} ON")
+
+        def off(self):
+            self.value = False
+            print(f"[SIM] GPIO {self.pin} OFF")
 
 pins_usados = [2, 3, 4, 17, 27, 22, 10, 9]
 
