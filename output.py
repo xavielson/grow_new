@@ -1,4 +1,5 @@
 import pickle
+from gpio_control import ligar_output, desligar_output
 
 class Output:
     def __init__(self, nome, device, pin):
@@ -15,12 +16,18 @@ class Output:
 
     def toggle(self):
         self.ativo = not self.ativo
+        if self.ativo == True:
+            ligar_output(self)
+        elif self.ativo == False:
+            desligar_output(self)
     
     def on(self):
         self.ativo = True
+        ligar_output(self)
 
     def off(self):
         self.ativo = False
+        desligar_output(self)
 
     def adicionar_horario(self, hora_liga, hora_desliga):
         self.horarios.append({"liga": hora_liga, "desliga": hora_desliga})

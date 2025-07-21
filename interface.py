@@ -6,9 +6,11 @@ from relogio import Relogio
 from janela_led import abrir_janela_led_lista
 from janela_rega import abrir_janela_rega_lista
 from janela_wavemaker import abrir_janela_wavemaker_lista
+from janela_runoff import abrir_janela_runoff_lista
 from utils_tk import centralizar_horizontal_abaixo
 
-from datetime import datetime
+from datetime import datetime, timedelta
+
 
 def criar_interface(gerenciador, salvar_callback):
 
@@ -180,6 +182,8 @@ def criar_interface(gerenciador, salvar_callback):
             janela_principal.after_idle(lambda: abrir_janela_rega_lista(janela_principal, output, salvar_e_habilitar))
         elif tipo == "Led":
             janela_principal.after_idle(lambda: abrir_janela_led_lista(janela_principal, output, salvar_e_habilitar))
+        elif tipo == "Runoff":
+            janela_principal.after_idle(lambda: abrir_janela_runoff_lista(janela_principal, output, salvar_e_habilitar))
         elif tipo == "Wavemaker":
             janela_principal.after_idle(lambda: abrir_janela_wavemaker_lista(janela_principal, output, salvar_e_habilitar))
         else:
@@ -223,6 +227,8 @@ def criar_interface(gerenciador, salvar_callback):
             abrir_janela_rega_lista(janela_principal, output, salvar_e_habilitar)
         elif tipo == "Led":
             abrir_janela_led_lista(janela_principal, output, salvar_e_habilitar)
+        elif tipo == "Runoff":
+            abrir_janela_runoff_lista(janela_principal, output, salvar_e_habilitar)
         elif tipo == "Wavemaker":
             abrir_janela_wavemaker_lista(janela_principal, output, salvar_e_habilitar)
         else:
@@ -230,10 +236,9 @@ def criar_interface(gerenciador, salvar_callback):
 
     # ----------- Automação dos horários dos relés -----------
 
-    def checar_e_aplicar_acoes():
-        agora = datetime.now()
+    def checar_e_aplicar_acoes(agora):
+        #agora = datetime.now()
         str_hora = agora.strftime("%H:%M:%S")
-        
         dia_semana_atual = agora.weekday()
         dias_map = {
             0: "Seg",
@@ -279,23 +284,103 @@ def criar_interface(gerenciador, salvar_callback):
                     if dia_evento != "All" and dia_evento != dia_semana_pt:
                         continue  # só processa se for o dia certo
 
-                    if "liga" in evento and evento["liga"] == str_hora:
-                        output.on()
-                    elif "desliga" in evento and evento["desliga"] == str_hora:
-                        output.off()
+                    # LIGAR
+                    if "liga" in evento and evento["liga"]:
+                        try:
+                            evento_time = datetime.strptime(evento["liga"], "%H:%M:%S").time()
+                            evento_dt = datetime.combine(datetime.today(), evento_time)
+                            delta = (agora - evento_dt).total_seconds()
+                        except Exception:
+                            continue
+                        if 0 <= delta < 0.9 and not evento.get("_liga_processado", False):
+                            output.on()
+                            evento["_liga_processado"] = True
+                        if delta >= 2:
+                            evento["_liga_processado"] = False  # Libera para próximos dias
+
+                    # DESLIGAR
+                    if "desliga" in evento and evento["desliga"]:
+                        try:
+                            evento_time = datetime.strptime(evento["desliga"], "%H:%M:%S").time()
+                            evento_dt = datetime.combine(datetime.today(), evento_time)
+                            delta = (agora - evento_dt).total_seconds()
+                        except Exception:
+                            continue
+                        if 0 <= delta < 0.9 and not evento.get("_desliga_processado", False):
+                            output.off()
+                            evento["_desliga_processado"] = True
+                        if delta >= 2:
+                            evento["_desliga_processado"] = False
 
             # ---------- Led ----------
             if getattr(output, "device", None) == "Led" and hasattr(output, "horarios"):
                 for evento in output.horarios:
-                    if "liga" in evento and evento["liga"] == str_hora:                        
-                        output.on()
-                    elif "desliga" in evento and evento["desliga"] == str_hora:                        
-                        output.off()
+                    # LIGAR
+                    if "liga" in evento and evento["liga"]:
+                        try:
+                            evento_time = datetime.strptime(evento["liga"], "%H:%M:%S").time()
+                            evento_dt = datetime.combine(datetime.today(), evento_time)
+                            delta = (agora - evento_dt).total_seconds()
+                        except Exception:
+                            continue
+                        if 0 <= delta < 0.9 and not evento.get("_liga_processado", False):
+                            output.on()
+                            evento["_liga_processado"] = True
+                        if delta >= 2:
+                            evento["_liga_processado"] = False
+
+                    # DESLIGAR
+                    if "desliga" in evento and evento["desliga"]:
+                        try:
+                            evento_time = datetime.strptime(evento["desliga"], "%H:%M:%S").time()
+                            evento_dt = datetime.combine(datetime.today(), evento_time)
+                            delta = (agora - evento_dt).total_seconds()
+                        except Exception:
+                            continue
+                        if 0 <= delta < 0.9 and not evento.get("_desliga_processado", False):
+                            output.off()
+                            evento["_desliga_processado"] = True
+                        if delta >= 2:
+                            evento["_desliga_processado"] = False
+
+            # ---------- Runoff ----------
+            if getattr(output, "device", None) == "Runoff" and hasattr(output, "horarios"):
+                for evento in output.horarios:
+                    # LIGAR
+                    if "liga" in evento and evento["liga"]:
+                        try:
+                            evento_time = datetime.strptime(evento["liga"], "%H:%M:%S").time()
+                            evento_dt = datetime.combine(datetime.today(), evento_time)
+                            delta = (agora - evento_dt).total_seconds()
+                        except Exception:
+                            continue
+                        if 0 <= delta < 0.9 and not evento.get("_liga_processado", False):
+                            output.on()
+                            evento["_liga_processado"] = True
+                        if delta >= 2:
+                            evento["_liga_processado"] = False
+
+                    # DESLIGAR
+                    if "desliga" in evento and evento["desliga"]:
+                        try:
+                            evento_time = datetime.strptime(evento["desliga"], "%H:%M:%S").time()
+                            evento_dt = datetime.combine(datetime.today(), evento_time)
+                            delta = (agora - evento_dt).total_seconds()
+                        except Exception:
+                            continue
+                        if 0 <= delta < 0.9 and not evento.get("_desliga_processado", False):
+                            output.off()
+                            evento["_desliga_processado"] = True
+                        if delta >= 2:
+                            evento["_desliga_processado"] = False    
+
 
     def loop_agendador():
-        checar_e_aplicar_acoes()
+        agora = datetime.now()
+        checar_e_aplicar_acoes(agora)
+        label_relogio.config(text=agora.strftime("%a %H:%M:%S"))
         atualizar_lista()  # Agora, só status, sem piscar!
-        janela_principal.after(1000, loop_agendador)
+        janela_principal.after(200, loop_agendador)
 
     janela_principal = tk.Tk()
     janela_principal.withdraw()
@@ -340,9 +425,7 @@ def criar_interface(gerenciador, salvar_callback):
     x = (largura_tela // 2) - (largura // 2)
     y = (altura_tela // 2) - (altura // 2) - 300
     y = max(0, y)
-    janela_principal.geometry(f"+{x}+{y}")
-
-    
+    janela_principal.geometry(f"+{x}+{y}")    
 
     def ajustar_estado_inicial_wavemakers(gerenciador):
         agora_dt = datetime.now()
@@ -369,7 +452,7 @@ def criar_interface(gerenciador, salvar_callback):
                     output.off()
                 output.relay_is_active = estado_desejado
 
-    Relogio.mostrar_em(label_relogio)
+    #Relogio.mostrar_em(label_relogio)
 
     botoes_status = {}
 
