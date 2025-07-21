@@ -177,7 +177,7 @@ def criar_interface(gerenciador, salvar_callback):
                 salvar_callback(*args, **kwargs)
             btn_modificar_horarios.config(state="normal")
 
-        # Use after_idle para garantir que a janela principal está visível e prontos para abrir a nova janela
+        # Use after_idle para garantir que a janela principal está visível e pronta para abrir a nova janela
         if tipo == "Rega":
             janela_principal.after_idle(lambda: abrir_janela_rega_lista(janela_principal, output, salvar_e_habilitar))
         elif tipo == "Led":
